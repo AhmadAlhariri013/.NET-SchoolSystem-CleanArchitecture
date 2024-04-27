@@ -9,7 +9,7 @@ using SchoolProject.Data.Entities.Identities;
 
 namespace SchoolProject.Core.Features.ApplicationUsers.Commands.Handlers
 {
-    internal class AddUserHandler : ResponseHandler, IRequestHandler<AddUserCommand, Response<string>>
+    internal class UserCommandHandler : ResponseHandler, IRequestHandler<AddUserCommand, Response<string>>
     {
         #region Fields
         private readonly IStringLocalizer<SharedResources> _localizer;
@@ -19,7 +19,7 @@ namespace SchoolProject.Core.Features.ApplicationUsers.Commands.Handlers
         #endregion
 
         #region Constructors
-        public AddUserHandler(IStringLocalizer<SharedResources> localizer,
+        public UserCommandHandler(IStringLocalizer<SharedResources> localizer,
                               IMapper mapper,
                               UserManager<User> userManager) : base(localizer)
         {
