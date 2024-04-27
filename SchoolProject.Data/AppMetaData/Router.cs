@@ -17,14 +17,19 @@
             public const string Edit = Prefix + "/Edit";
             public const string Delete = Prefix + "/Edit" + SingleRoute;
             public const string Paginated = Prefix + "/Paginated";
-
         }
 
         public static class DepartmentRouting
         {
             public const string Prefix = Rule + "Departmetn";
             public const string GetById = Prefix + "/Id";
-
         }
+
+        public static class ApplicationUserRouting
+        {
+            public const string Prefix = Rule + "User";
+            public const string Create = Prefix + "/Create";
+        }
+
     }
 }

@@ -20,9 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Features\ApplicationUsers\Queries\" />
     <Folder Include="Features\Departments\Commands\Handlers\" />
     <Folder Include="Features\Departments\Commands\Models\" />
     <Folder Include="Features\Departments\Commands\Validators\" />
+    <Folder Include="Mapping\ApplicationUsers\QueryMapping\" />
     <Folder Include="Mapping\Departments\CommandMapping\" />
   </ItemGroup>
 
