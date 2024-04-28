@@ -15,7 +15,7 @@
             public const string GetById = Prefix + SingleRoute;
             public const string Create = Prefix + "/Create";
             public const string Edit = Prefix + "/Edit";
-            public const string Delete = Prefix + "/Edit" + SingleRoute;
+            public const string Delete = Prefix + "/Delete" + SingleRoute;
             public const string Paginated = Prefix + "/Paginated";
         }
 
@@ -31,6 +31,11 @@
             public const string Create = Prefix + "/Create";
             public const string List = Prefix + "/List";
             public const string GetById = Prefix + SingleRoute;
+            public const string Edit = Prefix + "/Edit";
+            public const string Delete = Prefix + "/Delete" + SingleRoute;
+            public const string ChangePassword = Prefix + "/Change-Password";
+
+
         }
 
     }

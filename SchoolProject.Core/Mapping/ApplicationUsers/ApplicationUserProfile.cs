@@ -9,6 +9,7 @@ namespace SchoolProject.Core.Mapping.ApplicationUsers
             AddUserMapping();
             GetPaginatedUserListMapping();
             GetUserByIDMapping();
+            EditUserMapping();
         }
     }
 }

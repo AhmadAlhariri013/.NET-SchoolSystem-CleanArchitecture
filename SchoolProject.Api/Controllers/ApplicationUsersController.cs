@@ -12,6 +12,7 @@ namespace SchoolProject.Api.Controllers
     {
 
 
+        // Create User Endpoint
         [HttpPost(Router.ApplicationUserRouting.Create)]
         public async Task<IActionResult> CreateUser([FromBody] AddUserCommand command)
         {
@@ -19,6 +20,7 @@ namespace SchoolProject.Api.Controllers
             return NewResult(response);
         }
 
+        // Get Users List Endpoint
         [HttpGet(Router.ApplicationUserRouting.List)]
         public async Task<IActionResult> GetPaginatedUsersList([FromQuery] GetPaginatedUserListQuery query)
         {
@@ -26,11 +28,38 @@ namespace SchoolProject.Api.Controllers
             return Ok(response);
         }
 
+        // Get User By Id Endpoint
         [HttpGet(Router.ApplicationUserRouting.GetById)]
         public async Task<IActionResult> GetUserById([FromRoute] string id)
         {
             var response = await Mediator.Send(new GetUserByIDQuery(id));
             return NewResult(response);
         }
+
+
+        // Edit User Endpoint
+        [HttpPut(Router.ApplicationUserRouting.Edit)]
+        public async Task<IActionResult> GetUserById([FromBody] EditUserCommand user)
+        {
+            var response = await Mediator.Send(user);
+            return NewResult(response);
+        }
+
+        // Delete User Endpoint
+        [HttpDelete(Router.ApplicationUserRouting.Delete)]
+        public async Task<IActionResult> DeleteUser([FromRoute] string id)
+        {
+            var response = await Mediator.Send(new DeleteUserCommand(id));
+            return NewResult(response);
+        }
+
+        // Change User Password Endpoint
+        [HttpPut(Router.ApplicationUserRouting.ChangePassword)]
+        public async Task<IActionResult> ChangeUserPassword([FromBody] ChangeUserPasswordCommand command)
+        {
+            var response = await Mediator.Send(command);
+            return NewResult(response);
+        }
+
     }
 }
