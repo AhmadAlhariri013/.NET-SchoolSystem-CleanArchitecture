@@ -34,9 +34,14 @@
             public const string Edit = Prefix + "/Edit";
             public const string Delete = Prefix + "/Delete" + SingleRoute;
             public const string ChangePassword = Prefix + "/Change-Password";
-
-
         }
 
+        public static class AuthenticationRouting
+        {
+            public const string Prefix = Rule + "Authentication";
+            public const string SignIn = Prefix + "/SignIn";
+            public const string RefreshToken = Prefix + "/Refresh-Token";
+            public const string ValidateToken = Prefix + "/Validate-Token";
+        }
     }
 }

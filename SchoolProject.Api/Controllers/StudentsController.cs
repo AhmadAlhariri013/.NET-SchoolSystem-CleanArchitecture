@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SchoolProject.Api.Base;
 using SchoolProject.Core.Features.Students.Commands.Models;
 using SchoolProject.Core.Features.Students.Queries.Models;
@@ -8,6 +9,7 @@ namespace SchoolProject.Api.Controllers
 {
 
     [ApiController]
+    [Authorize]
     public class StudentsController : AppControllerBase
     {
 
