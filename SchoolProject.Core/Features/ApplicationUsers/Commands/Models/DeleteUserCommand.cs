@@ -5,9 +5,9 @@ namespace SchoolProject.Core.Features.ApplicationUsers.Commands.Models
 {
     public class DeleteUserCommand : IRequest<Response<string>>
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
 
-        public DeleteUserCommand(string id)
+        public DeleteUserCommand(int id)
         {
             Id = id;
         }

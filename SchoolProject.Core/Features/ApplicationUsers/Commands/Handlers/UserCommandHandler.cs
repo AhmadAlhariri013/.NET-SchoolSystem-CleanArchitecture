@@ -70,7 +70,7 @@ namespace SchoolProject.Core.Features.ApplicationUsers.Commands.Handlers
         public async Task<Response<string>> Handle(EditUserCommand request, CancellationToken cancellationToken)
         {
             // Check if User is exist
-            var userToUpdate = await _userManager.FindByIdAsync(request.Id);
+            var userToUpdate = await _userManager.FindByIdAsync(request.Id.ToString());
             if (userToUpdate is null) return NotFound<string>(_localizer[SharedResourcesKeys.NotFound]);
 
             // Mapping
@@ -97,7 +97,7 @@ namespace SchoolProject.Core.Features.ApplicationUsers.Commands.Handlers
         public async Task<Response<string>> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
             // Find The User
-            var userToDelete = await _userManager.FindByIdAsync(request.Id);
+            var userToDelete = await _userManager.FindByIdAsync(request.Id.ToString());
 
             // Check if the user is exist
             if (userToDelete is null) return NotFound<string>(_localizer[SharedResourcesKeys.NotFound]);
