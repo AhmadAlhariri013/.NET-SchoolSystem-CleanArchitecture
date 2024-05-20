@@ -8,12 +8,20 @@ namespace SchoolProject.Infrustructure.Repositories
 {
     public class StudentRepository : GenericRepository<Student>, IStudentRepository
     {
+        #region Fields
         private readonly DbSet<Student> _Students;
+        #endregion
+
+
+        #region Constuctors
 
         public StudentRepository(AppDbContext dbContext) : base(dbContext)
         {
             _Students = dbContext.Set<Student>();
         }
+        #endregion
+
+
         #region Handles Functions
         public async Task<List<Student>> GetStudentsListAsync()
         {
