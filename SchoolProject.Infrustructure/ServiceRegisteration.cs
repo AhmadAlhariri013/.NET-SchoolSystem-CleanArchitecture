@@ -15,7 +15,7 @@ namespace SchoolProject.Infrustructure
     {
         public static IServiceCollection AddServiceRegisteration(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddIdentity<User, IdentityRole<int>>(option =>
+            services.AddIdentity<User, Role>(option =>
             {
                 // Password settings.
                 option.Password.RequireDigit = true;
@@ -96,6 +96,27 @@ namespace SchoolProject.Infrustructure
             }
            });
             });
+
+            services.AddAuthorization(option =>
+            {
+                option.AddPolicy("CreateStudent", policy =>
+                {
+                    policy.RequireClaim("Create Student", "True");
+                });
+                option.AddPolicy("DeleteStudent", policy =>
+                {
+                    policy.RequireClaim("Delete Student", "True");
+                });
+                option.AddPolicy("EditStudent", policy =>
+                {
+                    policy.RequireClaim("Edit Student", "True");
+                });
+                option.AddPolicy("GetStudent", policy =>
+                {
+                    policy.RequireClaim("Get Student", "True");
+                });
+            });
+
             return services;
         }
     }
