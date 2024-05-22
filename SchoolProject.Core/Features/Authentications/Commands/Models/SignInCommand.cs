@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using SchoolProject.Core.Basies;
-using SchoolProject.Data.Helpers;
+using SchoolProject.Data.Responses;
 
 namespace SchoolProject.Core.Features.Authentications.Commands.Models
 {

@@ -5,7 +5,7 @@ using SchoolProject.Core.Basies;
 using SchoolProject.Core.Features.Authentications.Commands.Models;
 using SchoolProject.Core.Resources;
 using SchoolProject.Data.Entities.Identities;
-using SchoolProject.Data.Helpers;
+using SchoolProject.Data.Responses;
 using SchoolProject.Service.Interfaces;
 
 namespace SchoolProject.Core.Features.Authentications.Commands.Handlers
@@ -86,7 +86,7 @@ namespace SchoolProject.Core.Features.Authentications.Commands.Handlers
             }
 
             // Generates a new refresh token string
-            var result = _authenticationService.GetRefreshToken(user, jwtToken, expiryDate, request.RefreshToken);
+            var result = await _authenticationService.GetRefreshToken(user, jwtToken, expiryDate, request.RefreshToken);
 
             // Returns a JwtAuthResult object containing the new access token and refresh token details.
             return Success(result);

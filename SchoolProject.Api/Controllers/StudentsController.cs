@@ -9,11 +9,10 @@ namespace SchoolProject.Api.Controllers
 {
 
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class StudentsController : AppControllerBase
     {
-
-
+        [Authorize(Policy = "GetStudent")]
         [HttpGet(Router.StudentRouting.List)]
         public async Task<IActionResult> GetAllStudents()
         {
@@ -21,6 +20,7 @@ namespace SchoolProject.Api.Controllers
             return NewResult(response);
         }
 
+        [Authorize(Policy = "GetStudent")]
         [HttpGet(Router.StudentRouting.GetById)]
         public async Task<IActionResult> GetStudentById([FromRoute] int id)
         {
@@ -28,6 +28,7 @@ namespace SchoolProject.Api.Controllers
             return NewResult(response);
         }
 
+        [Authorize(Policy = "GetStudent")]
         [HttpGet(Router.StudentRouting.Paginated)]
         public async Task<IActionResult> Paginated([FromQuery] GetStudentPaginatedListQuery query)
         {
@@ -35,6 +36,7 @@ namespace SchoolProject.Api.Controllers
             return Ok(response);
         }
 
+        [Authorize(Policy = "CreateStudent")]
         [HttpPost(Router.StudentRouting.Create)]
         public async Task<IActionResult> CreateStudent([FromBody] AddStudentCommand command)
         {
@@ -42,6 +44,7 @@ namespace SchoolProject.Api.Controllers
             return NewResult(response);
         }
 
+        [Authorize(Policy = "EditStudent")]
         [HttpPut(Router.StudentRouting.Edit)]
         public async Task<IActionResult> UpdateStudent([FromForm] EditStudentCommand command)
         {
@@ -49,6 +52,7 @@ namespace SchoolProject.Api.Controllers
             return NewResult(response);
         }
 
+        [Authorize(Policy = "DeleteStudent")]
         [HttpDelete(Router.StudentRouting.Delete)]
         public async Task<IActionResult> DeleteStudent([FromRoute] int id)
         {

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SchoolProject.Data.Entities.Identities;
 using SchoolProject.Data.Helpers;
+using SchoolProject.Data.Responses;
 using SchoolProject.Infrustructure.Interfaces;
 using SchoolProject.Service.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
@@ -37,8 +38,7 @@ namespace SchoolProject.Service.Implementations
         public async Task<JwtAuthResponse> GetJWTToken(User user)
         {
             // Generate Access Token
-            var (jwtToken, accessToken) = GenerateJWTToken(user);
-
+            var (jwtToken, accessToken) = await GenerateJWTToken(user);
 
             // Generate Refresh Token && Store It In Database
             var refreshToken = GetRefreshToken(user.UserName);
@@ -54,6 +54,7 @@ namespace SchoolProject.Service.Implementations
                 CreatedAt = DateTime.UtcNow,
                 ExpiresAt = DateTime.UtcNow.AddMonths(_jwtSettings.RefreshTokenExpireDate),
             };
+
             // Store Refresh Token To Database
             await _refreshTokenRepository.AddAsync(refreshTokenToStore);
 
@@ -67,17 +68,17 @@ namespace SchoolProject.Service.Implementations
 
         }
 
-        private (JwtSecurityToken, string) GenerateJWTToken(User user)
+        private async Task<(JwtSecurityToken, string)> GenerateJWTToken(User user)
         {
             // Get User Claims
-            var claims = GetClaims(user);
+            var claims = await GetClaims(user);
 
             // JWT Object
             var jwtToken = new JwtSecurityToken(
                 _jwtSettings.Issuer,
                 _jwtSettings.Audience,
                 claims,
-                expires: DateTime.Now.AddMinutes(_jwtSettings.AccessTokenExpireDate),
+                expires: DateTime.Now.AddDays(_jwtSettings.AccessTokenExpireDate),
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.Secret)), SecurityAlgorithms.HmacSha256Signature));
 
             // Converts the JWT object to a string representation (access token).
@@ -98,10 +99,11 @@ namespace SchoolProject.Service.Implementations
 
             };
         }
-        public JwtAuthResponse GetRefreshToken(User user, JwtSecurityToken jwtToken, DateTime? expireDate, string refreshToken)
+
+        public async Task<JwtAuthResponse> GetRefreshToken(User user, JwtSecurityToken jwtToken, DateTime? expireDate, string refreshToken)
         {
             // Generate New JWT Token and Deconstruct the result 
-            var (jwtSecurityToken, newToken) = GenerateJWTToken(user);
+            var (jwtSecurityToken, newToken) = await GenerateJWTToken(user);
 
             // Create an object of JwtAuthResponse and one of the RefreshToken
             var refreshTokenResult = new RefreshToken();
@@ -124,15 +126,34 @@ namespace SchoolProject.Service.Implementations
             return Convert.ToBase64String(randomNumber);
         }
 
-        private List<Claim> GetClaims(User user)
+        public async Task<List<Claim>> GetClaims(User user)
         {
-            return new List<Claim>()
+            // Get User's Roles
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            // Create claims 
+            var claims = new List<Claim>()
             {
-                new Claim(nameof(UserClaimModel.UserName),user.UserName),
-                new Claim(nameof(UserClaimModel.Email),user.Email),
-                new Claim(nameof(UserClaimModel.PhoneNumber),user.PhoneNumber),
-                new Claim(nameof(UserClaimModel.Id),user.Id.ToString()),
+                new Claim(ClaimTypes.Name,user.UserName),
+                new Claim(ClaimTypes.Email,user.Email),
+                new Claim(nameof(UserClaimModel.PhoneNumber), user.PhoneNumber),
+                new Claim(nameof(UserClaimModel.Id), user.Id.ToString())
             };
+
+            // Add User's Roles to the claims list
+            foreach (var role in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            // Get User's Claims
+            var userClaims = await _userManager.GetClaimsAsync(user);
+
+            // Add User's Claims to claims list
+            claims.AddRange(userClaims);
+
+            // Return the claims list that will be added to the token when generate it
+            return claims;
         }
 
         public JwtSecurityToken ReadJWTToken(string accessToken)
