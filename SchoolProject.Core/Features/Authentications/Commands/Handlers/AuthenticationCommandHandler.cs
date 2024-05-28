@@ -13,6 +13,7 @@ namespace SchoolProject.Core.Features.Authentications.Commands.Handlers
     public class AuthenticationCommandHandler : ResponseHandler,
                                                 IRequestHandler<SignInCommand, Response<JwtAuthResponse>>,
                                                 IRequestHandler<RefreshTokenCommand, Response<JwtAuthResponse>>
+
     {
         #region Fields
         private readonly IStringLocalizer<SharedResources> _localizer;
@@ -49,6 +50,9 @@ namespace SchoolProject.Core.Features.Authentications.Commands.Handlers
             // Check The Password If Correct
             var signInResult = _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
             if (!signInResult.IsCompletedSuccessfully) return BadRequest<JwtAuthResponse>(_localizer[SharedResourcesKeys.PasswordNotCorrect]);
+
+            // Check The Email If Confirmed
+            if (user.EmailConfirmed) return BadRequest<JwtAuthResponse>(_localizer[SharedResourcesKeys.EmailNotConfirmed]);
 
             // Generate Token
             var tokenResult = await _authenticationService.GetJWTToken(user);

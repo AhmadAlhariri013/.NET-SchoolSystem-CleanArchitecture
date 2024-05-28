@@ -248,6 +248,16 @@ namespace SchoolProject.Service.Implementations
             return (userId, expirydate);
         }
 
+        public async Task<string> ConfirmEmail(int userId, string code)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            var confirmEmail = await _userManager.ConfirmEmailAsync(user, code);
+
+            if (!confirmEmail.Succeeded)
+                return "ErrorWhenConfirmEmail";
+            return "Success";
+        }
+
 
 
 
