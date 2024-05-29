@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using SchoolProject.Data.Entities.Identities;
 using SchoolProject.Data.Helpers;
 using SchoolProject.Data.Responses;
+using SchoolProject.Infrustructure.Data;
 using SchoolProject.Infrustructure.Interfaces;
 using SchoolProject.Service.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
@@ -19,16 +20,22 @@ namespace SchoolProject.Service.Implementations
         private readonly JwtSettings _jwtSettings;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly UserManager<User> _userManager;
+        private readonly IEmailsService _emailsService;
+        private readonly AppDbContext _dbContext;
         #endregion
 
         #region Constructors
         public AuthenticationService(JwtSettings jwtSettings,
                                      IRefreshTokenRepository refreshTokenRepository,
-                                     UserManager<User> userManager)
+                                     UserManager<User> userManager,
+                                     IEmailsService emailsService,
+                                     AppDbContext dbContext)
         {
             _jwtSettings = jwtSettings;
             _refreshTokenRepository = refreshTokenRepository;
             _userManager = userManager;
+            _emailsService = emailsService;
+            _dbContext = dbContext;
         }
 
 
@@ -246,6 +253,103 @@ namespace SchoolProject.Service.Implementations
 
             var expirydate = userRefreshToken.ExpiresAt;
             return (userId, expirydate);
+        }
+
+        public async Task<string> ConfirmEmail(int userId, string code)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            var confirmEmail = await _userManager.ConfirmEmailAsync(user, code);
+
+            if (!confirmEmail.Succeeded)
+                return "ErrorWhenConfirmEmail";
+            return "Success";
+        }
+
+        public async Task<string> SendResetPasswordCode(string email)
+        {
+            var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                // Get the user you want to send a code to him by email
+                var user = await _userManager.FindByEmailAsync(email);
+
+                // Check if the user is exist
+                if (user is null) return "NotFound";
+
+                // Generate a random number => (code)
+                Random generator = new Random();
+                string randomNumber = generator.Next(0, 1000000).ToString("D6");
+
+                // Save (Update) the code in user table in the database
+                user.Code = randomNumber;
+                var updateResult = await _userManager.UpdateAsync(user);
+
+                // Check on the result of updating the user table
+                if (!updateResult.Succeeded) return "FaildToUpdateTheUser";
+
+                // Send the code you generated to the user by using "SendEmail" Service
+                var message = "Code To Reset Passsword : " + user.Code;
+                await _emailsService.SendEmail(email, message, "Reset Password Code");
+                await transaction.CommitAsync();
+
+                // Success To Send Reset Password Code
+                return "Success";
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return "Failed";
+            }
+
+
+        }
+
+        public async Task<string> ConfirmResetPassword(string code, string email)
+        {
+            // Get the user who will confirm the reseting password 
+            var user = await _userManager.FindByEmailAsync(email);
+            // Check if the user is exist
+            if (user is null) return "NotFound";
+
+            // Get the code that saved in the user table to confirm reset password
+            var userCode = user.Code;
+
+            // Compare between the code saved in user table and the code that the user entered in the endpoint
+            if (userCode == code) return "Success";
+
+            // If not equals
+            return "Failed";
+
+        }
+
+        public async Task<string> ResetPassword(string email, string password)
+        {
+            var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                // Get the user who will reset his password 
+                var user = await _userManager.FindByEmailAsync(email);
+                // Check if the user is exist
+                if (user is null) return "NotFound";
+
+                // Delete old password
+                await _userManager.RemovePasswordAsync(user);
+                // Add new password
+                if (!await _userManager.HasPasswordAsync(user))
+                {
+                    await _userManager.AddPasswordAsync(user, password);
+                }
+                await transaction.CommitAsync();
+                // Success
+                return "Success";
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return "Failed";
+            }
         }
 
 

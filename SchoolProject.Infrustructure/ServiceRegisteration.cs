@@ -38,10 +38,16 @@ namespace SchoolProject.Infrustructure
 
             }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 
-            //JWT Authentication
+            //JWT Settings Data Binding
             var jwtSettings = new JwtSettings();
             configuration.GetSection(nameof(jwtSettings)).Bind(jwtSettings);
             services.AddSingleton(jwtSettings);
+
+            //Email Settings Data Binding
+            var emailSettings = new EmailSettings();
+            configuration.GetSection(nameof(emailSettings)).Bind(emailSettings);
+            services.AddSingleton(emailSettings);
+
 
             // Authentication Settings
             services.AddAuthentication(x =>

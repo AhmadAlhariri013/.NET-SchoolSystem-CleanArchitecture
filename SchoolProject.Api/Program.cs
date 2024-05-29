@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SchoolProject.Core;
+using SchoolProject.Core.Filters;
 using SchoolProject.Core.Middleware;
 using SchoolProject.Data.Entities.Identities;
 using SchoolProject.Infrustructure;
@@ -20,6 +24,7 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("constr"));
 });
+
 
 // Add Dependencies 
 builder.Services.AddInfrustructureDependency()
@@ -72,7 +77,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+
+builder.Services.AddTransient<IUrlHelper>(x =>
+{
+    var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
+    var factory = x.GetRequiredService<IUrlHelperFactory>();
+    return factory.GetUrlHelper(actionContext);
+});
+
+builder.Services.AddTransient<AuthorizationFilter>();
+
 var app = builder.Build();
+
+
 
 using (var scope = app.Services.CreateScope())
 {
