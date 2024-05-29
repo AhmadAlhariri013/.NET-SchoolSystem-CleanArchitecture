@@ -12,7 +12,11 @@ namespace SchoolProject.Core.Features.Authentications.Commands.Handlers
 {
     public class AuthenticationCommandHandler : ResponseHandler,
                                                 IRequestHandler<SignInCommand, Response<JwtAuthResponse>>,
-                                                IRequestHandler<RefreshTokenCommand, Response<JwtAuthResponse>>
+                                                IRequestHandler<RefreshTokenCommand, Response<JwtAuthResponse>>,
+                                                IRequestHandler<SendResetPasswordCodeCommand, Response<string>>,
+                                                IRequestHandler<ResetPasswordCommand, Response<string>>
+
+
 
     {
         #region Fields
@@ -48,11 +52,11 @@ namespace SchoolProject.Core.Features.Authentications.Commands.Handlers
 
 
             // Check The Password If Correct
-            var signInResult = _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
-            if (!signInResult.IsCompletedSuccessfully) return BadRequest<JwtAuthResponse>(_localizer[SharedResourcesKeys.PasswordNotCorrect]);
+            var signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+            if (!signInResult.Succeeded) return BadRequest<JwtAuthResponse>(_localizer[SharedResourcesKeys.PasswordNotCorrect]);
 
             // Check The Email If Confirmed
-            if (user.EmailConfirmed) return BadRequest<JwtAuthResponse>(_localizer[SharedResourcesKeys.EmailNotConfirmed]);
+            if (!user.EmailConfirmed) return BadRequest<JwtAuthResponse>(_localizer[SharedResourcesKeys.EmailNotConfirmed]);
 
             // Generate Token
             var tokenResult = await _authenticationService.GetJWTToken(user);
@@ -94,6 +98,39 @@ namespace SchoolProject.Core.Features.Authentications.Commands.Handlers
 
             // Returns a JwtAuthResult object containing the new access token and refresh token details.
             return Success(result);
+        }
+
+        public async Task<Response<string>> Handle(SendResetPasswordCodeCommand request, CancellationToken cancellationToken)
+        {
+            // Use "SendResetPassword" Service to send an email that contains a code to reset the password
+            var result = await _authenticationService.SendResetPasswordCode(request.Email);
+
+            // Check on the result of sending reset password code to the user 
+            switch (result)
+            {
+                case "NotFound": return BadRequest<string>(_localizer[SharedResourcesKeys.UserIsNotFound]);
+                case "FaildToUpdateTheUser": return BadRequest<string>(_localizer[SharedResourcesKeys.TryAgainInAnotherTime]);
+                case "Failed": return BadRequest<string>(_localizer[SharedResourcesKeys.TryAgainInAnotherTime]);
+                case "Success": return Success<string>("");
+                default: return BadRequest<string>(_localizer[SharedResourcesKeys.TryAgainInAnotherTime]);
+            }
+
+
+        }
+
+        public async Task<Response<string>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
+        {
+            // Use "ResetPassword" Service to make the user reset his password after he confirmed the proccess by the code that receved on the email
+            var result = await _authenticationService.ResetPassword(request.Email, request.Password);
+
+            // Check on the result of confirming the reset password proccess
+            switch (result)
+            {
+                case "NotFound": return BadRequest<string>(_localizer[SharedResourcesKeys.UserIsNotFound]);
+                case "Failed": return BadRequest<string>(_localizer[SharedResourcesKeys.InvaildCode]);
+                case "Success": return Success<string>("");
+                default: return BadRequest<string>(_localizer[SharedResourcesKeys.InvaildCode]);
+            }
         }
 
         #endregion

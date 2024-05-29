@@ -12,6 +12,11 @@ namespace SchoolProject.Service.Interfaces
         public Task<JwtAuthResponse> GetRefreshToken(User user, JwtSecurityToken jwtToken, DateTime? expireDate, string refreshToken);
         public Task<string> ValidateToken(string accessToken);
         public Task<string> ConfirmEmail(int userId, string code);
+        public Task<string> SendResetPasswordCode(string email);
+        public Task<string> ConfirmResetPassword(string code, string email);
+        public Task<string> ResetPassword(string email, string password);
+
+
 
 
     }
